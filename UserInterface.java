@@ -129,7 +129,6 @@ public class UserInterface
        if(board.horizontalWin(marker) == true 
              || board.verticalWin(marker) == true)
        {
-          System.out.println("HIT");
           return true;
        }
        
@@ -141,6 +140,7 @@ public class UserInterface
        Board board = new Board();
        String playerMark, aiMark;
        boolean wonGame = false;
+       boolean playerWin = false;
 
        if (playerFirst)
        {
@@ -160,22 +160,58 @@ public class UserInterface
           if (playerFirst)
           {
              board.markMove(askUserMove(), playerMark);
+             board.printBoard();
              wonGame = checkWin(board, playerMark);
              
+             if(wonGame)
+             {
+                playerWin = true;
+                break;
+             }
+             
              ai.makeMove();
+             board.printBoard();
              wonGame = checkWin(board, aiMark);
+             
+             if(wonGame)
+             {
+                break;
+             }
           }
           else
           {
              ai.makeMove();
+             board.printBoard();
              wonGame = checkWin(board, aiMark);
              
+             if(wonGame)
+             {
+                break;
+             }
+             
              board.markMove(askUserMove(), playerMark);
+             board.printBoard();
              wonGame = checkWin(board, playerMark);
+             
+             if(wonGame)
+             {
+                playerWin = true;
+                break;
+             }
           }
-          
-          //System.out.println(wonGame);
-          board.printBoard();
+       }
+       
+       if(!wonGame)
+       {
+          System.out.println("Draw");
+       }
+       else if(playerWin)
+       {
+          System.out.println("You Win");
+       }
+       else
+       {
+          System.out.println("You Lose");
        }
     }
 }

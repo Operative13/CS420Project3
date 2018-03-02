@@ -137,7 +137,6 @@ public class Board
             {
                return true;
             }
-            System.out.print(counter);
          }
       }
       return false;
