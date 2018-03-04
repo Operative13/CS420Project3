@@ -155,6 +155,11 @@ public class Board implements Serializable
 
    // return the current board layout as a String
    public String[][] getBoard(){return board;}
+   
+   public void setBoard(int row, int col, String marker) // NEWCODE
+   {
+      board[row][col] = marker;
+   }
 
    // pause the program for the given amount of time in seconds
    public void pause(int waitTime)

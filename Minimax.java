@@ -46,8 +46,12 @@ public class Minimax implements Serializable
        //
        // int[] moveIndex = findMove();
        // aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
-      int[] moveIndex = getMove();
-       aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
+      
+      //int[] moveIndex = getMove();
+      //aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
+      int[] result = minimax(0, playerMark); // depth, max turn
+      //return new int[] {result[1], result[2]};   // row, col
+      aiMovesLog.add(convertMoveToString(result[1], result[2]));
 
    }
 
@@ -105,7 +109,7 @@ public class Minimax implements Serializable
          marker = 1;
       }
         // cut off point for search, THIS SHOULD AN BE OPTIMIZED FOR COMPETITION
-        if (depth == 6)
+        if (depth == 1)
         {
             //  RETURN THE COST OF THIS STATE
             return getCost(marker);
@@ -174,9 +178,21 @@ public class Minimax implements Serializable
 
     // heuristic
     // calculate the cost of the current state
-   public int getCost(int marker)
+   public int getCost(int marker) // NEWCODE
    {
       if(marker % 2 == 0)
+      {
+         return costCalculator(board.getBoard(), playerMark);
+      }
+      else
+      {
+         return costCalculator(board.getBoard(), aiMark);
+      }
+   }
+   
+   public int getCost(String marker)
+   {
+      if(marker == playerMark)
       {
          return costCalculator(board.getBoard(), playerMark);
       }
@@ -190,7 +206,7 @@ public class Minimax implements Serializable
    {
       
       int cost = 0;
-      
+
       int counter = 0;
       for(int i = 1; i < 9; i++)
       {
@@ -219,6 +235,47 @@ public class Minimax implements Serializable
             }
             else
             {
+               if(!board[i][j].equalsIgnoreCase("_"))
+               {
+                  cost -= 1;
+               }
+               counter = 0; // reset counter if marker not detected
+            }
+         }
+      }
+      
+      counter = 0;
+      for(int i = 1; i < 9; i++)
+      {
+         for(int j = 1; j < 9; j++)
+         {
+            if(board[j][i].equalsIgnoreCase(marker))
+            {
+               counter++; // Count if marker is there
+               if(counter == 1)
+               {
+                  cost += 1;
+               }
+               else if (counter == 2)
+               {
+                  cost += 10;
+               }
+               else if (counter == 3)
+               {
+                  cost += 100;
+               }
+               else if (counter >= 4)
+               {
+                  cost = 1000000;
+                  return cost;
+               }
+            }
+            else
+            {
+               if(!board[j][i].equalsIgnoreCase("_"))
+               {
+                  cost -= 1;
+               }
                counter = 0; // reset counter if marker not detected
             }
          }
@@ -228,36 +285,38 @@ public class Minimax implements Serializable
       
    }
 
-   public int[] minimax(int depth, int player)
+   public int[] minimax(int depth, String player) // NEWCODE
    {
       // Generate possible next moves in a List of int[2] of {row, col}.
       List<int[]> nextMoves = generateMoves();
  
       // mySeed is maximizing; while oppSeed is minimizing
-      int bestScore = (player == mySeed) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      int bestScore = (player.equals(playerMark)) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
       int currentScore;
       int bestRow = -1;
       int bestCol = -1;
  
-      if (nextMoves.isEmpty() || depth == 0) {
+      if (nextMoves.isEmpty() || depth == 6)
+      {
          // Gameover or depth reached, evaluate score
-         bestScore = evaluate();
+         bestScore = getCost(player);
       }
       else
       {
          for (int[] move : nextMoves)
          {
             // Try this move for the current "player"
-            cells[move[0]][move[1]].content = player;
-            if (player == mySeed) {  // mySeed (computer) is maximizing player
-               currentScore = minimax(depth - 1, oppSeed)[0];
+            board.setBoard(move[0], move[1], player);
+            //board.getBoard()[move[0]][move[1]].content = player;
+            if (player == playerMark) {  // mySeed (computer) is maximizing player
+               currentScore = minimax(depth + 1, aiMark)[0];
                if (currentScore > bestScore) {
                   bestScore = currentScore;
                   bestRow = move[0];
                   bestCol = move[1];
                }
             } else {  // oppSeed is minimizing player
-               currentScore = minimax(depth - 1, mySeed)[0];
+               currentScore = minimax(depth + 1, playerMark)[0];
                if (currentScore < bestScore) {
                   bestScore = currentScore;
                   bestRow = move[0];
@@ -265,18 +324,20 @@ public class Minimax implements Serializable
                }
             }
             // Undo move
-            cells[move[0]][move[1]].content = Seed.EMPTY;
+            board.setBoard(move[0], move[1], "_");
+            //cells[move[0]][move[1]].content = Seed.EMPTY;
          }
       }
       return new int[] {bestScore, bestRow, bestCol};
    }
    
+   // Generates the list of all possible moves for a player // NEWCODE
    public List<int[]> generateMoves()
    {
       List<int[]> nextMoves = new ArrayList<int[]>(); // allocate List
  
       // If gameover, i.e., no next move
-      if()
+      if(board.isFull() || checkWin(aiMark) || checkWin(playerMark))
       {
          return nextMoves;
       }
@@ -287,11 +348,23 @@ public class Minimax implements Serializable
           {
               if (board.getBoard()[row][col].equals("_"))
               {
-                 
+                 nextMoves.add(new int[] {row, col});
               }
           }
       }
       return nextMoves;
+   }
+   
+   // Checks if the given player has won the game
+   public boolean checkWin(String marker)
+   {
+      if(board.horizontalWin(marker) == true
+            || board.verticalWin(marker) == true)
+      {
+         return true;
+      }
+
+      return false;
    }
    
    public int max(int x, int y){return x > y ? x : y;}
