@@ -1,15 +1,13 @@
 package project3;
 
-public class Board
+import java.lang.Thread;
+import java.lang.InterruptedException;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class Board implements Serializable
 {
    private String[][] board;
-
-   /*
-   public static void main(String[] args)
-   {
-      new Board();
-   }
-   */
 
    public Board()
    {
@@ -54,68 +52,44 @@ public class Board
             System.out.printf("%-3s ", col);
          System.out.println();
       }
+      System.out.println();
    }
 
-   // place a marker depending on the player at the given position on the board
-   // intended use for the user
-   public void markMove(String move, String marker)
+   // print the log of moves made
+   public void printMovesLog(boolean playerFirst, ArrayList<String> playerMovesLog, ArrayList<String> aiMovesLog)
    {
-      int col = Character.getNumericValue(move.charAt(1));;
-      int row = -1;
+       if (playerFirst)
+       {
+           System.out.println("Player vs. Opponent");
+           for (int i = 0; i < playerMovesLog.size(); i++)
+           {
+               System.out.print((i+1) + ". " + playerMovesLog.get(i) + " ");
+               if (i < aiMovesLog.size())
+                   System.out.print(aiMovesLog.get(i));
 
-      move = move.toUpperCase();
-      switch (move.charAt(0))
-      {
-         case 'A':
-            row = 1;
-            break;
-         case 'B':
-            row = 2;
-            break;
-         case 'C':
-            row = 3;
-            break;
-         case 'D':
-            row = 4;
-            break;
-         case 'E':
-            row = 5;
-            break;
-         case 'F':
-            row = 6;
-            break;
-         case 'G':
-            row = 7;
-            break;
-         case 'H':
-            row = 8;
-            break;
-         default: // If nothing matches, break
-            break;
-      }
-      
-      // Used to debug invalid moves. Remove later
-      try
-      {
-         if((row > 0 && row < 9) && (col > 0 && col < 9))
-         {
-            board[row][col] = marker;
-         }
-         else
-         {
-            throw new IllegalArgumentException("Invalid move detected! Please enter a valid coordinate.");
-         }
-      }
-      catch(IllegalArgumentException e)
-      {
-          System.out.println(e.getMessage());
-      }
+               System.out.println();
+           }
+       }
+
+       else
+       {
+           System.out.println("Opponent vs. Player");
+           for (int i = 0; i < aiMovesLog.size(); i++)
+           {
+               System.out.print((i+1) + ". " + aiMovesLog.get(i) + " ");
+               if (i < playerMovesLog.size())
+                    System.out.print(playerMovesLog.get(i));
+
+               System.out.println();
+           }
+       }
+
+       System.out.println();
    }
 
-   // place a marker depending on the player at the given position on the board
-   // intended use for the program
+   // place a marker depending on the current player at the given position on the board
    public void markMove(int row, int col, String marker){board[row][col] = marker;}
-   
+
    // Checks for horizontal win on board
    public boolean horizontalWin(String marker)
    {
@@ -132,7 +106,7 @@ public class Board
             {
                counter = 0; // reset counter if marker not detected
             }
-            
+
             if(counter >= 4) // If counter is greater than or equal to 4, winner
             {
                return true;
@@ -141,7 +115,7 @@ public class Board
       }
       return false;
    }
-   
+
    // Checks for vertical win on board
    public boolean verticalWin(String marker)
    {
@@ -158,7 +132,7 @@ public class Board
             {
                counter = 0;
             }
-            
+
             if(counter >= 4) // If counter is greater than or equal to 4, winner
             {
                return true;
@@ -168,7 +142,7 @@ public class Board
       }
       return false;
    }
-   
+
    // return true if all spaces on the board are full, false otherwise
    public boolean isFull()
    {
@@ -177,5 +151,21 @@ public class Board
             if (value.equals("_"))
                return false;
       return true;
+   }
+
+   // return the current board layout as a String
+   public String[][] getBoard(){return board;}
+
+   // pause the program for the given amount of time in seconds
+   public void pause(int waitTime)
+   {
+       try
+       {
+           Thread.sleep(waitTime * 1000);
+       }
+       catch (InterruptedException e)
+       {
+           e.printStackTrace();
+       }
    }
 }
