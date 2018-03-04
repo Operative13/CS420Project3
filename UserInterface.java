@@ -12,6 +12,7 @@ public class UserInterface implements Serializable
     private Board board;
     private boolean playerFirst, savedFile, loadedFile;
     private double maxTime;
+    private int[] playerMoves;
     private transient Scanner keyboard;         // transient means do not store this object when saving this class as an object
     Minimax ai;
 
@@ -21,6 +22,7 @@ public class UserInterface implements Serializable
         keyboard = new Scanner(System.in);
         loadedFile = false;
         playerFirst = false;
+        playerMoves = new int[64];
         playerMovesLog = new ArrayList<String>(32); // 32 = board size / 2 = 8*8 / 2 = 64 / 2 = 32
         savedFile = false;
         maxTime = 5.0;
@@ -323,7 +325,7 @@ public class UserInterface implements Serializable
        // initialize ai object if one was not loaded by the user
        if (!loadedFile)
        {
-            ai = new Minimax(board, maxTime, aiMark, playerMark);
+            ai = new Minimax(board, maxTime, aiMark, playerMark, playerMoves);
             loadedFile = false;     // reset boolean
        }
 
@@ -333,10 +335,10 @@ public class UserInterface implements Serializable
           {
              // user makes move
              playerMove = askUserMove();
+             playerMoves[playerMove[0]] = playerMove[1];
              board.markMove(playerMove[0], playerMove[1], playerMark);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, playerMark);
 
              if(wonGame)
@@ -347,10 +349,9 @@ public class UserInterface implements Serializable
 
              // ai makes move
              ai.makeMove();
-             ai.testMove();   // DELETE AFTER TESTING
+            //ai.testMove();   // DELETE AFTER TESTING
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, aiMark);
 
              if(wonGame)
@@ -362,7 +363,6 @@ public class UserInterface implements Serializable
              ai.makeMove();
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, aiMark);
 
              if(wonGame)
@@ -370,10 +370,10 @@ public class UserInterface implements Serializable
 
              // user makes move
              playerMove = askUserMove();
+             playerMoves[playerMove[0]] = playerMove[1];
              board.markMove(playerMove[0], playerMove[1], playerMark);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, playerMark);
 
              if(wonGame)

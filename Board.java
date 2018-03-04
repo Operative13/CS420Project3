@@ -156,12 +156,12 @@ public class Board implements Serializable
    // return the current board layout as a String
    public String[][] getBoard(){return board;}
 
-   // pause the program for the given amount of time in seconds
-   public void pause(int waitTime)
+   // pause the program for the given amount of time in milliseconds
+   public void pause(long waitTime)
    {
        try
        {
-           Thread.sleep(waitTime * 1000);
+           Thread.sleep(waitTime);
        }
        catch (InterruptedException e)
        {
