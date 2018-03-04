@@ -323,7 +323,7 @@ public class UserInterface implements Serializable
        // initialize ai object if one was not loaded by the user
        if (!loadedFile)
        {
-            ai = new Minimax(maxTime, aiMark, board);
+            ai = new Minimax(board, maxTime, aiMark, playerMark);
             loadedFile = false;     // reset boolean
        }
 
@@ -331,7 +331,7 @@ public class UserInterface implements Serializable
        {
           if (playerFirst)
           {
-             // user goes makes move
+             // user makes move
              playerMove = askUserMove();
              board.markMove(playerMove[0], playerMove[1], playerMark);
              board.printBoard();

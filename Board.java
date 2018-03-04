@@ -83,7 +83,7 @@ public class Board implements Serializable
                System.out.println();
            }
        }
-              
+
        System.out.println();
    }
 
