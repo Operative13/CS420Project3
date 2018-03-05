@@ -105,7 +105,7 @@ public class Minimax implements Serializable
    public int minimax(int depth, boolean isMax, int alpha, int beta, long start)
    {
         // cut off point for search, THIS SHOULD AN BE OPTIMIZED FOR COMPETITION
-        if (depth == 5)
+        if (depth == 4)
         {
             //  RETURN THE COST OF THIS STATE
             int cost =  getCost();
@@ -224,11 +224,11 @@ public class Minimax implements Serializable
                     if (horCountAI > 0)
                     {
                        if (horCountAI == 1)
-                          cost -= 1;
+                          cost -= 2;
                       else if (horCountAI == 2)
-                          cost -= 10;
+                          cost -= 20;
                       else if (horCountAI == 3)
-                          cost -= 100;
+                          cost -= 200;
                       else if (horCountAI >= 4)
                            cost += maximum;
 
@@ -239,11 +239,11 @@ public class Minimax implements Serializable
                     if (verCountAI > 0)
                     {
                        if (verCountAI == 1)
-                          cost -= 1;
+                          cost -= 2;
                       else if (verCountAI == 2)
-                          cost -= 10;
+                          cost -= 20;
                       else if (verCountAI == 3)
-                          cost -= 100;
+                          cost -= 200;
                       else if (verCountAI >= 4)
                            cost += maximum;
 
@@ -255,11 +255,11 @@ public class Minimax implements Serializable
                     {
 
                        if (horCountPlayer == 1)
-                          cost += 1;
+                          cost += 2;
                       else if (horCountPlayer == 2)
-                          cost += 10;
+                          cost += 20;
                       else if (horCountPlayer == 3)
-                          cost += 100;
+                          cost += 200;
                       else if (horCountPlayer >= 4)
                            cost -= maximum;
                        
@@ -270,11 +270,11 @@ public class Minimax implements Serializable
                     if (verCountPlayer > 0)
                     {
                        if (verCountPlayer == 1)
-                          cost += 1;
+                          cost += 2;
                       else if (verCountPlayer == 2)
-                          cost += 10;
+                          cost += 20;
                       else if (verCountPlayer == 3)
-                          cost += 100;
+                          cost += 200;
                       else if (verCountPlayer >= 4)
                            cost -= maximum;
 
@@ -300,17 +300,17 @@ public class Minimax implements Serializable
                        else if (boardLayout[i][k+1].equalsIgnoreCase(playerMark))
                        {
                           if (horCountAI == 1)
-                             cost -= 1;
+                             cost -= 2;
                          else if (horCountAI == 2)
-                             cost -= 10;
+                             cost -= 20;
                          else if (horCountAI == 3)
-                             cost -= 100;
+                             cost -= 200;
                        }
                        
                        if (horCountAI == 4)
                           cost += maximum;
                        else if (horCountAI > 4)
-                          cost += 2 * maximuml
+                          cost += 2 * maximum;
 
                         horCountAI = 0;    // reset counter
                     }
@@ -330,11 +330,11 @@ public class Minimax implements Serializable
                        else if (boardLayout[i][k+1].equalsIgnoreCase(playerMark))
                        {
                           if (verCountAI == 1)
-                             cost -= 1;
+                             cost -= 2;
                          else if (verCountAI == 2)
-                             cost -= 10;
+                             cost -= 20;
                          else if (verCountAI == 3)
-                             cost -= 100;
+                             cost -= 200;
                        }
                        
                        if (verCountAI == 4)
@@ -360,11 +360,11 @@ public class Minimax implements Serializable
                        else if (boardLayout[i][k+1].equalsIgnoreCase(aiMark))
                        {
                           if (horCountPlayer == 1)
-                             cost += 1;
+                             cost += 2;
                           else if (horCountPlayer == 2)
-                             cost += 10;
+                             cost += 20;
                           else if (horCountPlayer == 3)
-                             cost += 100;
+                             cost += 200;
                        }
                        
                        if (horCountPlayer == 4)
