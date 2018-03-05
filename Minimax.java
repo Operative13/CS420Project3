@@ -105,7 +105,7 @@ public class Minimax implements Serializable
    public int minimax(int depth, boolean isMax, int alpha, int beta, long start)
    {
         // cut off point for search, THIS SHOULD AN BE OPTIMIZED FOR COMPETITION
-        if (depth == 6)
+        if (depth == 5)
         {
             //  RETURN THE COST OF THIS STATE
             int cost =  getCost();
@@ -181,8 +181,6 @@ public class Minimax implements Serializable
    public int getCost()
     {
         int cost = 0;
-        int costAI = 0;
-        int costPlayer = 0;
 
         int horCountAI = 0;
         int verCountAI = 0;
@@ -201,15 +199,23 @@ public class Minimax implements Serializable
             {
                 // check horizontal cases
                 if (boardLayout[i][k].equalsIgnoreCase(aiMark))
-                    horCountAI++;
+                {
+                   horCountAI++;
+                }
                 else if (boardLayout[i][k].equalsIgnoreCase(playerMark))
-                    horCountPlayer++;
+                {
+                   horCountPlayer++;
+                }
 
                 // check vertical cases
                 if (boardLayout[k][i].equalsIgnoreCase(aiMark))
-                    verCountAI++;
+                {
+                   verCountAI++;
+                }
                 else if (boardLayout[k][i].equalsIgnoreCase(playerMark))
-                    verCountPlayer++;
+                {
+                   verCountPlayer++;
+                }
 
                 // compute cost when at the edge of the board
                 if (i == 8 || k == 8)
@@ -217,14 +223,14 @@ public class Minimax implements Serializable
                     // compute cost of the ai's horizonal line
                     if (horCountAI > 0)
                     {
-                        if (horCountAI == 1)
-                            cost += 1;
-                        else if (horCountAI == 2)
-                            cost += 10;
-                        else if (horCountAI == 3)
-                            cost += 100;
-                        else if (horCountAI >= 4)
-                            cost += maximum;
+                       if (horCountAI == 1)
+                          cost -= 1;
+                      else if (horCountAI == 2)
+                          cost -= 10;
+                      else if (horCountAI == 3)
+                          cost -= 100;
+                      else if (horCountAI >= 4)
+                           cost += maximum;
 
                         horCountAI = 0;    // reset counter
                     }
@@ -232,13 +238,13 @@ public class Minimax implements Serializable
                     // compute cost of the ai's vertical line
                     if (verCountAI > 0)
                     {
-                        if (verCountAI == 1)
-                            cost += 1;
-                        else if (verCountAI == 2)
-                            cost += 10;
-                        else if (verCountAI == 3)
-                            cost += 100;
-                        else if (verCountAI >= 4)
+                       if (verCountAI == 1)
+                          cost -= 1;
+                      else if (verCountAI == 2)
+                          cost -= 10;
+                      else if (verCountAI == 3)
+                          cost -= 100;
+                      else if (verCountAI >= 4)
                            cost += maximum;
 
                         verCountAI = 0;    // reset counter
@@ -247,29 +253,30 @@ public class Minimax implements Serializable
                     // compute cost of the player's horizonal line
                     if (horCountPlayer > 0)
                     {
-                        if (horCountPlayer == 1)
-                            cost -= 1;
-                        else if (horCountPlayer == 2)
-                            cost -= 10;
-                        else if (horCountPlayer == 3)
-                            cost -= 100;
-                        else if (horCountPlayer >= 4)
-                           cost -= minimum;
 
+                       if (horCountPlayer == 1)
+                          cost += 1;
+                      else if (horCountPlayer == 2)
+                          cost += 10;
+                      else if (horCountPlayer == 3)
+                          cost += 100;
+                      else if (horCountPlayer >= 4)
+                           cost -= maximum;
+                       
                         horCountPlayer = 0;    // reset counter
                     }
 
                     // compute cost of the player's vertical line
                     if (verCountPlayer > 0)
                     {
-                        if (verCountPlayer == 1)
-                            cost -= 1;
-                        else if (verCountPlayer == 2)
-                            cost -= 10;
-                        else if (verCountPlayer == 3)
-                            cost -= 100;
-                        else if (verCountPlayer >= 4)
-                           cost -= minimum;
+                       if (verCountPlayer == 1)
+                          cost += 1;
+                      else if (verCountPlayer == 2)
+                          cost += 10;
+                      else if (verCountPlayer == 3)
+                          cost += 100;
+                      else if (verCountPlayer >= 4)
+                           cost -= maximum;
 
                         verCountPlayer = 0;
                     }
@@ -281,14 +288,29 @@ public class Minimax implements Serializable
                     // compute cost of the ai's horizonal line
                     if (horCountAI > 0 && !boardLayout[i][k+1].equalsIgnoreCase(aiMark))
                     {
-                        if (horCountAI == 1)
-                            cost += 1;
-                        else if (horCountAI == 2)
-                            cost += 10;
-                        else if (horCountAI == 3)
-                            cost += 100;
-                        else if (horCountAI >= 4)
-                            cost += maximum;
+                       if(!boardLayout[i][k+1].equalsIgnoreCase(playerMark))
+                       {
+                          if (horCountAI == 1)
+                             cost += 1;
+                         else if (horCountAI == 2)
+                             cost += 10;
+                         else if (horCountAI == 3)
+                             cost += 100;
+                       }
+                       else if (boardLayout[i][k+1].equalsIgnoreCase(playerMark))
+                       {
+                          if (horCountAI == 1)
+                             cost -= 1;
+                         else if (horCountAI == 2)
+                             cost -= 10;
+                         else if (horCountAI == 3)
+                             cost -= 100;
+                       }
+                       
+                       if (horCountAI == 4)
+                          cost += maximum;
+                       else if (horCountAI > 4)
+                          cost += 2 * maximuml
 
                         horCountAI = 0;    // reset counter
                     }
@@ -296,14 +318,29 @@ public class Minimax implements Serializable
                     // compute cost of the ai's vertical line
                     if (verCountAI > 0 && !boardLayout[k+1][i].equalsIgnoreCase(aiMark))
                     {
-                        if (verCountAI == 1)
-                            cost += 1;
-                        else if (verCountAI == 2)
-                            cost += 10;
-                        else if (verCountAI == 3)
-                            cost += 100;
-                        else if (verCountAI >= 4)
-                            cost += maximum;
+                       if(!boardLayout[i][k+1].equalsIgnoreCase(playerMark))
+                       {
+                          if (verCountAI == 1)
+                             cost += 1;
+                         else if (verCountAI == 2)
+                             cost += 10;
+                         else if (verCountAI == 3)
+                             cost += 100;
+                       }
+                       else if (boardLayout[i][k+1].equalsIgnoreCase(playerMark))
+                       {
+                          if (verCountAI == 1)
+                             cost -= 1;
+                         else if (verCountAI == 2)
+                             cost -= 10;
+                         else if (verCountAI == 3)
+                             cost -= 100;
+                       }
+                       
+                       if (verCountAI == 4)
+                          cost += maximum;
+                       else if (verCountAI > 4)
+                          cost += 2 * maximum;
 
                         verCountAI = 0;    // reset counter
                     }
@@ -311,14 +348,29 @@ public class Minimax implements Serializable
                     // compute cost of the player's horizonal line
                     if (horCountPlayer > 0 && !boardLayout[i][k+1].equalsIgnoreCase(playerMark))
                     {
-                        if (horCountPlayer == 1)
-                            cost -= 1;
-                        else if (horCountPlayer == 2)
-                            cost -= 10;
-                        else if (horCountPlayer == 3)
-                            cost -= 100;
-                        else if (horCountPlayer >= 4)
-                            cost -= minimum;
+                       if(!boardLayout[i][k+1].equalsIgnoreCase(aiMark))
+                       {
+                          if (horCountPlayer == 1)
+                             cost -= 1;
+                          else if (horCountPlayer == 2)
+                             cost -= 10;
+                          else if (horCountPlayer == 3)
+                             cost -= 100;
+                       }
+                       else if (boardLayout[i][k+1].equalsIgnoreCase(aiMark))
+                       {
+                          if (horCountPlayer == 1)
+                             cost += 1;
+                          else if (horCountPlayer == 2)
+                             cost += 10;
+                          else if (horCountPlayer == 3)
+                             cost += 100;
+                       }
+                       
+                       if (horCountPlayer == 4)
+                          cost -= minimum;
+                       else if (horCountPlayer > 4)
+                          cost -= 2 * minimum;
 
                         horCountPlayer = 0;    // reset counter
                     }
@@ -326,14 +378,29 @@ public class Minimax implements Serializable
                     // compute cost of the player's vertical line
                     if (verCountPlayer > 0 && !boardLayout[k+1][i].equalsIgnoreCase(playerMark))
                     {
-                        if (verCountPlayer == 1)
-                            cost -= 1;
-                        else if (verCountPlayer == 2)
-                            cost -= 10;
-                        else if (verCountPlayer == 3)
-                            cost -= 100;
-                        else if (verCountPlayer >= 4)
-                            cost -= minimum;
+                       if(!boardLayout[i][k+1].equalsIgnoreCase(aiMark))
+                       {
+                          if (verCountPlayer == 1)
+                             cost -= 1;
+                          else if (verCountPlayer == 2)
+                             cost -= 10;
+                          else if (verCountPlayer == 3)
+                             cost -= 100;
+                       }
+                       else if (boardLayout[i][k+1].equalsIgnoreCase(aiMark))
+                       {
+                          if (verCountPlayer == 1)
+                             cost += 1;
+                          else if (verCountPlayer == 2)
+                             cost += 10;
+                          else if (verCountPlayer == 3)
+                             cost += 100;
+                       }
+                       
+                       if (verCountPlayer == 4)
+                          cost -= minimum;
+                       else if (verCountPlayer > 4)
+                          cost -= 2 * minimum;
 
                         verCountPlayer = 0;
                     }
