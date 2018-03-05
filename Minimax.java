@@ -5,10 +5,11 @@ import java.util.*;   // DELETE AFTER TESTING
 
 public class Minimax implements Serializable
 {
-   private ArrayList<String> aiMovesLog;
-   private double maxTime;
-   private Board board;
-   private String aiMark, playerMark;
+    private ArrayList<String> aiMovesLog;
+    private double maxTime;
+    private Board board;
+    private int[] aiMoves, playerMoves;
+    private String aiMark, playerMark;
 
    // DELETE AFTER TESTING
 
@@ -31,31 +32,29 @@ public class Minimax implements Serializable
        }
    }
 
-   public Minimax(Board board, double maxTime, String aiMarker, String playerMarker)
+   public Minimax(Board board, double maxTime, String aiMarker, String playerMarker, int[] playerMoves)
    {
       this.maxTime = maxTime;
       this.board = board;
+
       aiMark = aiMarker;
-      playerMark = playerMarker;
+      aiMoves = new int[64];
       aiMovesLog = new ArrayList<String>(32); // 32 = board size / 2 = 8*8 / 2 = 64 / 2 = 32
+
+      playerMark = playerMarker;
+      playerMoves = new int[64];
    }
 
    public void makeMove()
    {
        // disable until the required methods are completed
        //
-       // int[] moveIndex = findMove();
-       // aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
-      
-      //int[] moveIndex = getMove();
-      //aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
-      int[] result = minimax(0, playerMark); // depth, max turn
-      //return new int[] {result[1], result[2]};   // row, col
-      aiMovesLog.add(convertMoveToString(result[1], result[2]));
-
+       int[] moveIndex = getMove();
+       aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
+       board.markMove(moveIndex[0],  moveIndex[1], aiMark);
    }
 
-   // return the a integer array containing the position of the best move to make
+   // return an integer array containing the position of the best move to make
    public int[] getMove()
    {
        int bestValue = Integer.MIN_VALUE;
@@ -63,37 +62,39 @@ public class Minimax implements Serializable
        int[] bestMove = new int[2];
        String[][] boardLayout = board.getBoard();
 
-       // make the current state the root node
-       // Node root = new Node(board.getBoard());
+       long start = System.nanoTime();
+       double elapsedTime = 0.0;
 
-       // explore every empty space and calculate the cost of that move
-       for (int row = 1; row < 9; row++)
-       {
-           for (int col = 1; col < 9; col++)
-           {
-               if (boardLayout[row][col].equals("_"))
-               {
-                   // make a possible move
-                   boardLayout[row][col] = aiMark;
+            // explore every empty space and calculate the cost of that move
+            for (int row = 1; row < 9; row++)
+            {
+                for (int col = 1; col < 9 && elapsedTime < maxTime; col++)
+                {
+                    if (boardLayout[row][col].equals("_"))
+                    {
+                        // make a possible move
+                        boardLayout[row][col] = aiMark;
 
-                   // determine this moves cost
-                   currentValue = minimax(0, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                        // determine this moves cost
+                        currentValue = minimax(0, true, Integer.MIN_VALUE, Integer.MAX_VALUE, start);
 
-                   // restore the previous board layout
-                   boardLayout[row][col] = "_";
+                        // restore the previous board layout
+                        boardLayout[row][col] = "_";
 
-                   // save the best cost move
-                   if (currentValue > bestValue)
-                   {
-                       bestValue = currentValue;
-                       bestMove[0] = row;
-                       bestMove[1] = col;
-                   }
-               }
-           }
-       }
-       
+                        // save the best cost move
+                        if (currentValue > bestValue)
+                        {
+                            bestValue = currentValue;
+                            bestMove[0] = row;
+                            bestMove[1] = col;
+                        }
+                    }
+                    elapsedTime = ( (double)System.nanoTime() - start) / 1000000000.0;
+                    System.out.println("elapsedTime: " + elapsedTime);
+                }
+            }
 
+            System.out.println("BestValue: " + bestValue);
        return bestMove;
    }
 
@@ -101,18 +102,15 @@ public class Minimax implements Serializable
    // of the current board playout depending on the current player (max or min)
    // alpha = best (highest value) found for MAX so far
    // beta = best (lowest value) found for MIN so far
-   public int minimax(int depth, boolean isMax, int alpha, int beta)
+   public int minimax(int depth, boolean isMax, int alpha, int beta, long start)
    {
-      int marker = 0;
-      if(!isMax)
-      {
-         marker = 1;
-      }
         // cut off point for search, THIS SHOULD AN BE OPTIMIZED FOR COMPETITION
-        if (depth == 1)
+        if (depth == 6)
         {
             //  RETURN THE COST OF THIS STATE
-            return getCost(marker);
+            int cost =  getCost();
+            // System.out.println("Cost: " + cost);
+            return cost;
         }
 
         int bestCost, currentCost;
@@ -123,52 +121,54 @@ public class Minimax implements Serializable
         {
             bestCost = Integer.MIN_VALUE;      // default to lowest possible value
 
-            for (int row = 1; row < 9; row++)
-            {
-                for (int col = 1; col < 9; col++)
+                for (int row = 1; row < 9; row++)
                 {
-                    if (board.getBoard()[row][col].equals("_"))
+                    for (int col = 1; col < 9; col++)
                     {
-                        board.getBoard()[row][col] = playerMark;
+                        if (board.getBoard()[row][col].equals("_"))
+                        {
+                            board.getBoard()[row][col] = aiMark;
 
-                        currentCost = minimax(depth+1, !isMax, alpha, beta);
-                        bestCost = max(bestCost, currentCost);
-                        alpha = max(alpha, bestCost);
+                            currentCost = minimax(depth+1, false, alpha, beta, start);
+                            bestCost = max(bestCost, currentCost);
+                            alpha = max(alpha, bestCost);
 
-                        if (beta <= alpha)
-                            break;
+                            // reset board to the previous (original) state
+                            board.getBoard()[row][col] = "_";
 
-                        // reset board to the previous (original) state
-                        board.getBoard()[row][col] = "_";
+                            if (beta <= alpha)
+                                break;
+                        }
                     }
                 }
+                return bestCost;
             }
-            return bestCost;
-        }
 
         // minimizer
         // determine the best cost as the smallest cost of the visited states
         else
         {
             bestCost = Integer.MAX_VALUE;      // default to largest possible value
-
-            for (int row = 1; row < 9; row++)
             {
-                for (int col = 1; col < 9; col++)
+                for (int row = 1; row < 9; row++)
                 {
-                    if (board.getBoard()[row][col].equals("_"))
+                    for (int col = 1; col < 9; col++)
                     {
-                        board.getBoard()[row][col] = playerMark;
+                        if (board.getBoard()[row][col].equals("_"))
+                        {
+                            board.getBoard()[row][col] = playerMark;
 
-                        currentCost = minimax(depth+1, isMax, alpha, beta);
-                        bestCost = min(bestCost, currentCost);
-                        alpha = min(alpha, bestCost);
+                            currentCost = minimax(depth+1, true, alpha, beta, start);
+                            bestCost = min(bestCost, currentCost);
+                            beta = min(beta, bestCost);
 
-                        if (beta <= alpha)
-                            break;
+                            // reset board to the previous (original) state
+                            board.getBoard()[row][col] = "_";
 
-                        // reset board to the previous (original) state
-                        board.getBoard()[row][col] = "_";
+                            if (beta <= alpha)
+                                break;
+                        }
+
                     }
                 }
             }
@@ -178,195 +178,171 @@ public class Minimax implements Serializable
 
     // heuristic
     // calculate the cost of the current state
-   public int getCost(int marker) // NEWCODE
-   {
-      if(marker % 2 == 0)
-      {
-         return costCalculator(board.getBoard(), playerMark);
-      }
-      else
-      {
-         return costCalculator(board.getBoard(), aiMark);
-      }
-   }
-   
-   public int getCost(String marker)
-   {
-      if(marker == playerMark)
-      {
-         return costCalculator(board.getBoard(), playerMark);
-      }
-      else
-      {
-         return costCalculator(board.getBoard(), aiMark);
-      }
-   }
-   
-   public int costCalculator(String[][] board, String marker)
-   {
-      
-      int cost = 0;
+   public int getCost()
+    {
+        int cost = 0;
+        int costAI = 0;
+        int costPlayer = 0;
 
-      int counter = 0;
-      for(int i = 1; i < 9; i++)
-      {
-         for(int j = 1; j < 9; j++)
-         {
-            if(board[i][j].equalsIgnoreCase(marker))
-            {
-               counter++; // Count if marker is there
-               if(counter == 1)
-               {
-                  cost += 1;
-               }
-               else if (counter == 2)
-               {
-                  cost += 10;
-               }
-               else if (counter == 3)
-               {
-                  cost += 100;
-               }
-               else if (counter >= 4)
-               {
-                  cost = 1000000;
-                  return cost;
-               }
-            }
-            else
-            {
-               if(!board[i][j].equalsIgnoreCase("_"))
-               {
-                  cost -= 1;
-               }
-               counter = 0; // reset counter if marker not detected
-            }
-         }
-      }
-      
-      counter = 0;
-      for(int i = 1; i < 9; i++)
-      {
-         for(int j = 1; j < 9; j++)
-         {
-            if(board[j][i].equalsIgnoreCase(marker))
-            {
-               counter++; // Count if marker is there
-               if(counter == 1)
-               {
-                  cost += 1;
-               }
-               else if (counter == 2)
-               {
-                  cost += 10;
-               }
-               else if (counter == 3)
-               {
-                  cost += 100;
-               }
-               else if (counter >= 4)
-               {
-                  cost = 1000000;
-                  return cost;
-               }
-            }
-            else
-            {
-               if(!board[j][i].equalsIgnoreCase("_"))
-               {
-                  cost -= 1;
-               }
-               counter = 0; // reset counter if marker not detected
-            }
-         }
-      }
-      
-      return cost;
-      
-   }
+        int horCountAI = 0;
+        int verCountAI = 0;
 
-   public int[] minimax(int depth, String player) // NEWCODE
-   {
-      // Generate possible next moves in a List of int[2] of {row, col}.
-      List<int[]> nextMoves = generateMoves();
- 
-      // mySeed is maximizing; while oppSeed is minimizing
-      int bestScore = (player.equals(playerMark)) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-      int currentScore;
-      int bestRow = -1;
-      int bestCol = -1;
- 
-      if (nextMoves.isEmpty() || depth == 6)
-      {
-         // Gameover or depth reached, evaluate score
-         bestScore = getCost(player);
-      }
-      else
-      {
-         for (int[] move : nextMoves)
-         {
-            // Try this move for the current "player"
-            board.setBoard(move[0], move[1], player);
-            //board.getBoard()[move[0]][move[1]].content = player;
-            if (player == playerMark) {  // mySeed (computer) is maximizing player
-               currentScore = minimax(depth + 1, aiMark)[0];
-               if (currentScore > bestScore) {
-                  bestScore = currentScore;
-                  bestRow = move[0];
-                  bestCol = move[1];
-               }
-            } else {  // oppSeed is minimizing player
-               currentScore = minimax(depth + 1, playerMark)[0];
-               if (currentScore < bestScore) {
-                  bestScore = currentScore;
-                  bestRow = move[0];
-                  bestCol = move[1];
-               }
-            }
-            // Undo move
-            board.setBoard(move[0], move[1], "_");
-            //cells[move[0]][move[1]].content = Seed.EMPTY;
-         }
-      }
-      return new int[] {bestScore, bestRow, bestCol};
-   }
-   
-   // Generates the list of all possible moves for a player // NEWCODE
-   public List<int[]> generateMoves()
-   {
-      List<int[]> nextMoves = new ArrayList<int[]>(); // allocate List
- 
-      // If gameover, i.e., no next move
-      if(board.isFull() || checkWin(aiMark) || checkWin(playerMark))
-      {
-         return nextMoves;
-      }
-      
-      for (int row = 1; row < 9; row++)
-      {
-          for (int col = 1; col < 9; col++)
-          {
-              if (board.getBoard()[row][col].equals("_"))
-              {
-                 nextMoves.add(new int[] {row, col});
-              }
-          }
-      }
-      return nextMoves;
-   }
-   
-   // Checks if the given player has won the game
-   public boolean checkWin(String marker)
-   {
-      if(board.horizontalWin(marker) == true
-            || board.verticalWin(marker) == true)
-      {
-         return true;
-      }
+        int horCountPlayer = 0;
+        int verCountPlayer = 0;
 
-      return false;
-   }
-   
+        int maximum = 10000;
+        int minimum = 10000;
+
+        String[][] boardLayout = board.getBoard();
+
+        for (int i = 1; i < 9; i++)
+        {
+            for (int k = 1; k < 9; k++)
+            {
+                // check horizontal cases
+                if (boardLayout[i][k].equalsIgnoreCase(aiMark))
+                    horCountAI++;
+                else if (boardLayout[i][k].equalsIgnoreCase(playerMark))
+                    horCountPlayer++;
+
+                // check vertical cases
+                if (boardLayout[k][i].equalsIgnoreCase(aiMark))
+                    verCountAI++;
+                else if (boardLayout[k][i].equalsIgnoreCase(playerMark))
+                    verCountPlayer++;
+
+                // compute cost when at the edge of the board
+                if (i == 8 || k == 8)
+                {
+                    // compute cost of the ai's horizonal line
+                    if (horCountAI > 0)
+                    {
+                        if (horCountAI == 1)
+                            cost += 1;
+                        else if (horCountAI == 2)
+                            cost += 10;
+                        else if (horCountAI == 3)
+                            cost += 100;
+                        else if (horCountAI >= 4)
+                            cost += maximum;
+
+                        horCountAI = 0;    // reset counter
+                    }
+
+                    // compute cost of the ai's vertical line
+                    if (verCountAI > 0)
+                    {
+                        if (verCountAI == 1)
+                            cost += 1;
+                        else if (verCountAI == 2)
+                            cost += 10;
+                        else if (verCountAI == 3)
+                            cost += 100;
+                        else if (verCountAI >= 4)
+                           cost += maximum;
+
+                        verCountAI = 0;    // reset counter
+                    }
+
+                    // compute cost of the player's horizonal line
+                    if (horCountPlayer > 0)
+                    {
+                        if (horCountPlayer == 1)
+                            cost -= 1;
+                        else if (horCountPlayer == 2)
+                            cost -= 10;
+                        else if (horCountPlayer == 3)
+                            cost -= 100;
+                        else if (horCountPlayer >= 4)
+                           cost -= minimum;
+
+                        horCountPlayer = 0;    // reset counter
+                    }
+
+                    // compute cost of the player's vertical line
+                    if (verCountPlayer > 0)
+                    {
+                        if (verCountPlayer == 1)
+                            cost -= 1;
+                        else if (verCountPlayer == 2)
+                            cost -= 10;
+                        else if (verCountPlayer == 3)
+                            cost -= 100;
+                        else if (verCountPlayer >= 4)
+                           cost -= minimum;
+
+                        verCountPlayer = 0;
+                    }
+                }
+
+                // compute cost when not at the end of the board
+                else if (i != 8 || k != 8)
+                {
+                    // compute cost of the ai's horizonal line
+                    if (horCountAI > 0 && !boardLayout[i][k+1].equalsIgnoreCase(aiMark))
+                    {
+                        if (horCountAI == 1)
+                            cost += 1;
+                        else if (horCountAI == 2)
+                            cost += 10;
+                        else if (horCountAI == 3)
+                            cost += 100;
+                        else if (horCountAI >= 4)
+                            cost += maximum;
+
+                        horCountAI = 0;    // reset counter
+                    }
+
+                    // compute cost of the ai's vertical line
+                    if (verCountAI > 0 && !boardLayout[k+1][i].equalsIgnoreCase(aiMark))
+                    {
+                        if (verCountAI == 1)
+                            cost += 1;
+                        else if (verCountAI == 2)
+                            cost += 10;
+                        else if (verCountAI == 3)
+                            cost += 100;
+                        else if (verCountAI >= 4)
+                            cost += maximum;
+
+                        verCountAI = 0;    // reset counter
+                    }
+
+                    // compute cost of the player's horizonal line
+                    if (horCountPlayer > 0 && !boardLayout[i][k+1].equalsIgnoreCase(playerMark))
+                    {
+                        if (horCountPlayer == 1)
+                            cost -= 1;
+                        else if (horCountPlayer == 2)
+                            cost -= 10;
+                        else if (horCountPlayer == 3)
+                            cost -= 100;
+                        else if (horCountPlayer >= 4)
+                            cost -= minimum;
+
+                        horCountPlayer = 0;    // reset counter
+                    }
+
+                    // compute cost of the player's vertical line
+                    if (verCountPlayer > 0 && !boardLayout[k+1][i].equalsIgnoreCase(playerMark))
+                    {
+                        if (verCountPlayer == 1)
+                            cost -= 1;
+                        else if (verCountPlayer == 2)
+                            cost -= 10;
+                        else if (verCountPlayer == 3)
+                            cost -= 100;
+                        else if (verCountPlayer >= 4)
+                            cost -= minimum;
+
+                        verCountPlayer = 0;
+                    }
+                }
+            }
+        }
+        return cost;
+    }
+
    public int max(int x, int y){return x > y ? x : y;}
    public int min(int x, int y){return x < y ? x : y;}
 
