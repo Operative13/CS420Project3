@@ -28,11 +28,6 @@ public class UserInterface implements Serializable
         maxTime = 5.0;
     }
 
-    public void error()
-    {
-       System.out.print("ERROR DETECTED");
-    }
-
     // Asks the user for the max time and order of play
     // Executes the game with user-defined conditions
     public void mainMenu()
@@ -154,7 +149,7 @@ public class UserInterface implements Serializable
           catch(InputMismatchException e)
           {
              keyboard.nextLine();
-             error();
+             System.out.println("Invalid input. Try again");
           }
        }
     }
@@ -349,7 +344,6 @@ public class UserInterface implements Serializable
 
              // ai makes move
              ai.makeMove();
-            //ai.testMove();   // DELETE AFTER TESTING
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
              wonGame = checkWin(board, aiMark);

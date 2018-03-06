@@ -6,9 +6,8 @@ import java.util.*;   // DELETE AFTER TESTING
 public class Minimax implements Serializable
 {
     private ArrayList<String> aiMovesLog;
-    private double maxTime;
     private Board board;
-    private int[] aiMoves, playerMoves;
+    private double maxTime;
     private String aiMark, playerMark;
 
    // DELETE AFTER TESTING
@@ -38,17 +37,13 @@ public class Minimax implements Serializable
       this.board = board;
 
       aiMark = aiMarker;
-      aiMoves = new int[64];
       aiMovesLog = new ArrayList<String>(32); // 32 = board size / 2 = 8*8 / 2 = 64 / 2 = 32
 
       playerMark = playerMarker;
-      playerMoves = new int[64];
    }
 
    public void makeMove()
    {
-       // disable until the required methods are completed
-       //
        int[] moveIndex = getMove();
        aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
        board.markMove(moveIndex[0],  moveIndex[1], aiMark);
@@ -90,9 +85,10 @@ public class Minimax implements Serializable
                         }
                     }
                     elapsedTime = ( (double)System.nanoTime() - start) / 1000000000.0;
-                    System.out.println("elapsedTime: " + elapsedTime);
                 }
             }
+            System.out.println("Best Cost: " + bestValue);
+            System.out.println(bestMove[0] + " " + bestMove[1]);
 
        return bestMove;
    }
@@ -103,14 +99,12 @@ public class Minimax implements Serializable
    // beta = best (lowest value) found for MIN so far
    public int minimax(int depth, boolean isMax, int alpha, int beta, long start)
    {
+
+        //  RETURN THE COST OF THIS STATE
         // cut off point for search, THIS SHOULD AN BE OPTIMIZED FOR COMPETITION
-        if (depth == 5)
-        {
-            //  RETURN THE COST OF THIS STATE
-            int cost =  getCost();
-            // System.out.println("Cost: " + cost);
-            return cost;
-        }
+        // depth should be an even number
+        if (depth == 4)
+            return getCost();
 
         int bestCost, currentCost;
 
@@ -135,6 +129,7 @@ public class Minimax implements Serializable
                             // reset board to the previous (original) state
                             board.getBoard()[row][col] = "_";
 
+                            // prune
                             if (beta <= alpha)
                                 break;
                         }
@@ -164,6 +159,7 @@ public class Minimax implements Serializable
                             // reset board to the previous (original) state
                             board.getBoard()[row][col] = "_";
 
+                            // prune
                             if (beta <= alpha)
                                 break;
                         }
@@ -177,168 +173,95 @@ public class Minimax implements Serializable
 
     // heuristic
     // calculate the cost of the current state
-   public int getCost()
-    {
-        int cost = 0;
+    public int getCost()
+     {
 
-        int horCountAI = 0;
-        int verCountAI = 0;
+         int maximum = 100000;
+         int minimum = -100000;
 
-        int horCountPlayer = 0;
-        int verCountPlayer = 0;
+         String[] rowCol = new String[2];
+         int cost = 0;
 
-        int maximum = Integer.MAX_VALUE;
-        int minimum = Integer.MIN_VALUE;
+         // evaluate the board assuming AI = O, Player = X
+         for (int i = 1; i < 9; i++)
+         {
+             rowCol = board.getRowCol(i, i);
+             String row = rowCol[0];
+             String col = rowCol[1];
 
-        String[][] boardLayout = board.getBoard();
+             // check win or lose states
+            if (row.contains("XXXX") || col.contains("XXXX"))
+                return minimum;
 
-        for (int i = 1; i < 9; i++)
-        {
-            for (int k = 1; k < 9; k++)
-            {
-                // check horizontal cases
-                if (boardLayout[i][k].equalsIgnoreCase(aiMark))
-                    horCountAI++;
-                else if (boardLayout[i][k].equalsIgnoreCase(playerMark))
-                    horCountPlayer++;
+            if (row.contains("OOOO") || col.contains("OOOO"))
+                return maximum;
 
-                // check vertical cases
-                if (boardLayout[k][i].equalsIgnoreCase(aiMark))
-                    verCountAI++;
-                else if (boardLayout[k][i].equalsIgnoreCase(playerMark))
-                    verCountPlayer++;
+            // check for player killer moves in row
+            if (row.contains("_XXX_"))
+                cost -= 200;
 
-                // compute cost when at the edge of the board
-                if (i == 8 || k == 8)
-                {
-                    // compute cost of the ai's horizonal line
-                    if (horCountAI > 0)
-                    {
-                        if (horCountAI == 1)
-                            cost += 1;
-                        else if (horCountAI == 2)
-                            cost += 10;
-                        else if (horCountAI == 3)
-                            cost += 100;
-                        else if (horCountAI >= 4)
-                            return maximum;
+            else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
+                    cost -= 100;
 
-                        horCountAI = 0;    // reset counter
-                    }
+            // check for player killer moves in column
+            if (col.contains("_XXX_"))
+                cost -= 200;
 
-                    // compute cost of the ai's vertical line
-                    if (verCountAI > 0)
-                    {
-                        if (verCountAI == 1)
-                            cost += 1;
-                        else if (verCountAI == 2)
-                            cost += 10;
-                        else if (verCountAI == 3)
-                            cost += 100;
-                        else if (verCountAI >= 4)
-                            return maximum;
+            else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
+                    cost -= 100;
 
-                        verCountAI = 0;    // reset counter
-                    }
+            // check for ai killer moves in row
+            if (row.contains("_OOO_"))
+               cost += 200;
 
-                    // compute cost of the player's horizonal line
-                    if (horCountPlayer > 0)
-                    {
-                        if (horCountPlayer == 1)
-                            cost -= 1;
-                        else if (horCountPlayer == 2)
-                            cost -= 10;
-                        else if (horCountPlayer == 3)
-                            cost -= 100;
-                        else if (horCountPlayer >= 4)
-                            return minimum;
+            else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
+                cost += 100;
 
-                        horCountPlayer = 0;    // reset counter
-                    }
+            // check for ai killer moves in column
+            if (col.contains("_OOO_"))
+                cost += 200;
 
-                    // compute cost of the player's vertical line
-                    if (verCountPlayer > 0)
-                    {
-                        if (verCountPlayer == 1)
-                            cost -= 1;
-                        else if (verCountPlayer == 2)
-                            cost -= 10;
-                        else if (verCountPlayer == 3)
-                            cost -= 100;
-                        else if (verCountPlayer >= 4)
-                            return minimum;
+            else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
+                cost += 100;
 
-                        verCountPlayer = 0;
-                    }
-                }
+            if (row.contains("_XX_"))
+                cost -= 50;
+            else if (row.contains("XX"))
+                    cost -= 10;
 
-                // compute cost when not at the end of the board
-                else if (i != 8 || k != 8)
-                {
-                    // compute cost of the ai's horizonal line
-                    if (horCountAI > 0 && !boardLayout[i][k+1].equalsIgnoreCase(aiMark))
-                    {
-                        if (horCountAI == 1)
-                            cost += 1;
-                        else if (horCountAI == 2)
-                            cost += 10;
-                        else if (horCountAI == 3)
-                            cost += 100;
-                        else if (horCountAI >= 4)
-                            return maximum;
+            if (col.contains("_XX_"))
+                cost -= 50;
+            else if (col.contains("XX"))
+                cost -= 10;
 
-                        horCountAI = 0;    // reset counter
-                    }
+            if (row.contains("_OO_"))
+                cost += 50;
+            else if (row.contains("OO"))
+                cost += 10;
 
-                    // compute cost of the ai's vertical line
-                    if (verCountAI > 0 && !boardLayout[k+1][i].equalsIgnoreCase(aiMark))
-                    {
-                        if (verCountAI == 1)
-                            cost += 1;
-                        else if (verCountAI == 2)
-                            cost += 10;
-                        else if (verCountAI == 3)
-                            cost += 100;
-                        else if (verCountAI >= 4)
-                            return maximum;
+            if (col.contains("_OO_"))
+                cost += 50;
+            else if (col.contains("OO"))
+                cost += 10;
 
-                        verCountAI = 0;    // reset counter
-                    }
+            if (row.contains("X"))
+                cost -= 1;
+            if (col.contains("X"))
+                cost -= 1;
 
-                    // compute cost of the player's horizonal line
-                    if (horCountPlayer > 0 && !boardLayout[i][k+1].equalsIgnoreCase(playerMark))
-                    {
-                        if (horCountPlayer == 1)
-                            cost -= 1;
-                        else if (horCountPlayer == 2)
-                            cost -= 10;
-                        else if (horCountPlayer == 3)
-                            cost -= 100;
-                        else if (horCountPlayer >= 4)
-                            return minimum;
+            if (row.contains("O"))
+                cost += 1;
+            if (col.contains("O"))
+                cost += 1;
 
-                        horCountPlayer = 0;    // reset counter
-                    }
-
-                    // compute cost of the player's vertical line
-                    if (verCountPlayer > 0 && !boardLayout[k+1][i].equalsIgnoreCase(playerMark))
-                    {
-                        if (verCountPlayer == 1)
-                            cost -= 1;
-                        else if (verCountPlayer == 2)
-                            cost -= 10;
-                        else if (verCountPlayer == 3)
-                            cost -= 100;
-                        else if (verCountPlayer >= 4)
-                            return minimum;
-
-                        verCountPlayer = 0;
-                    }
-                }
-            }
-        }
-        return cost;
-    }
+          }
+          // the above code assumes that the ai is O
+          // change the sign of cost if ai is X
+          if (!aiMark.equals("O"))
+              return -cost;
+          else
+            return cost;
+     }
 
    public int max(int x, int y){return x > y ? x : y;}
    public int min(int x, int y){return x < y ? x : y;}
