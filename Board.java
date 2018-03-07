@@ -1,5 +1,3 @@
-//package project3;
-
 import java.lang.Thread;
 import java.lang.InterruptedException;
 import java.io.Serializable;

@@ -1,5 +1,3 @@
-//package project3;
-
 import java.io.*;
 import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
@@ -131,13 +129,13 @@ public class UserInterface implements Serializable
 
        while (true)
        {
-          System.out.println("Enter maximum time to generate moves (1-30): ");
+          System.out.println("Enter maximum time to generate moves (5-30): ");
           try
           {
              maxTime = keyboard.nextDouble();
              keyboard.nextLine();    // catch last line if valid input is entered
-             if(maxTime < 1 || maxTime > 30)
-                throw new IllegalArgumentException("Input must be between 1 and 30.");
+             if(maxTime < 5 || maxTime > 30)
+                throw new IllegalArgumentException("Input must be between 5 and 30.");
 
              return maxTime;
           }
@@ -315,7 +313,7 @@ public class UserInterface implements Serializable
           aiMark = "X";
        }
 
-       int[] playerMove = new int[2];
+       int[] playerMove = {-1, -1};
 
        // initialize ai object if one was not loaded by the user
        if (!loadedFile)
@@ -323,6 +321,8 @@ public class UserInterface implements Serializable
             ai = new Minimax(board, maxTime, aiMark, playerMark, playerMoves);
             loadedFile = false;     // reset boolean
        }
+
+       board.printBoard();
 
        while (!board.isFull() || !wonGame)
        {
@@ -343,7 +343,7 @@ public class UserInterface implements Serializable
              }
 
              // ai makes move
-             ai.makeMove();
+             ai.makeMove(playerMove[0]);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
              wonGame = checkWin(board, aiMark);
@@ -354,7 +354,7 @@ public class UserInterface implements Serializable
           else
           {
              // ai makes move
-             ai.makeMove();
+             ai.makeMove(playerMove[0]);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
              wonGame = checkWin(board, aiMark);
@@ -386,5 +386,36 @@ public class UserInterface implements Serializable
 
        else
           System.out.println("You Lose");
+
+       boolean validInput = false;
+
+
+       // Asks to exit or play the game again
+       while(!validInput)
+       {
+          System.out.println("Play Again? (Y)es, or (N)o: ");
+          String answer = keyboard.nextLine();
+          if(answer.equalsIgnoreCase("Y"))
+          {
+             board.resetBoard();
+             mainMenu();
+             validInput = true;
+          }
+          else if (answer.equalsIgnoreCase("N"))
+          {
+             System.out.println("Shutting down...");
+             validInput = true;
+             keyboard.close();
+             System.exit(0);
+          }
+          else
+          {
+             System.out.println("Invalid choice! "
+                   + "Please enter either 'y' for yes or 'n' for no.");
+          }
+
+       }
+
     }
+
 }
