@@ -388,5 +388,36 @@ public class UserInterface implements Serializable
 
        else
           System.out.println("You Lose");
+       
+       boolean validInput = false;
+       
+       
+       // Asks to exit or play the game again
+       while(!validInput)
+       {
+          System.out.println("Play Again? (Y)es, or (N)o: ");
+          String answer = keyboard.nextLine();
+          if(answer.equalsIgnoreCase("Y"))
+          {
+             board.resetBoard();
+             mainMenu();
+             validInput = true;
+          }
+          else if (answer.equalsIgnoreCase("N"))
+          {
+             System.out.println("Shutting down...");
+             validInput = true;
+             keyboard.close();
+             System.exit(0);
+          }
+          else
+          {
+             System.out.println("Invalid choice! "
+                   + "Please enter either 'y' for yes or 'n' for no.");
+          }
+             
+       }
+       
     }
+    
 }

@@ -156,7 +156,7 @@ public class Minimax implements Serializable
 
         // cut off point for search
         // depth should be an even number
-        if (depth == 3)
+        if (depth == 2)
             return getCost(start);
 
         int bestCost, currentCost;
@@ -231,7 +231,7 @@ public class Minimax implements Serializable
 
         // cut off point for search
         // depth should be an even number
-        if (depth == 3)
+        if (depth == 2)
             return getCostOther(start);
 
         int bestCost, currentCost;
@@ -332,37 +332,37 @@ public class Minimax implements Serializable
 
            // check for player killer moves in row
            if (row.contains("_XXX_"))
-               cost -= 300;
+               cost -= 10000;
 
            else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
-               cost -= 150;
+               cost -= 1000;
            else if (row.contains("XXX"))
               cost -= 100;
            
            // check for player killer moves in column
            if (col.contains("_XXX_"))
-               cost -= 300;
+               cost -= 10000;
 
            else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
-               cost -= 150;
+               cost -= 1000;
            else if (col.contains("XXX"))
               cost -= 100;
 
            // check for ai killer moves in row
            if (row.contains("_OOO_"))
-               cost += 300;
+               cost += 10000;
 
            else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
-               cost += 150;
+               cost += 1000;
            else if (row.contains("OOO"))
               cost += 100;
 
            // check for ai killer moves in column
            if (col.contains("_OOO_"))
-               cost += 300;
+               cost += 10000;
 
            else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
-               cost += 150;
+               cost += 1000;
            else if (col.contains("OOO"))
               cost += 100;
 
@@ -463,36 +463,33 @@ public class Minimax implements Serializable
 
             // check for player killer moves in row
             if (row.contains("_XXX_"))
-                cost -= 300;
-
+                cost -= 10000;
             else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
-                cost -= 150;
+                cost -= 1000;
             else if (row.contains("XXX"))
                cost -= 100;
             
             // check for player killer moves in column
             if (col.contains("_XXX_"))
-                cost -= 300;
-
+                cost -= 10000;
             else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
-                cost -= 150;
+                cost -= 1000;
             else if (col.contains("XXX"))
                cost -= 100;
 
             // check for ai killer moves in row
             if (row.contains("_OOO_"))
-                cost += 300;
-
+                cost += 10000;
             else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
-                cost += 150;
+                cost += 1000;
             else if (row.contains("OOO"))
                cost += 100;
 
             // check for ai killer moves in column
             if (col.contains("_OOO_"))
-                cost += 300;
+                cost += 10000;
             else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
-                cost += 150;
+                cost += 1000;
             else if (col.contains("OOO"))
                cost += 100;
 
