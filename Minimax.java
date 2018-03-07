@@ -312,81 +312,115 @@ public class Minimax implements Serializable
         // evaluate the board assuming AI = O, Player = X
         for (int i = 1; i < 9; i++)
         {
-            elapsedTime = ((double) System.nanoTime() - start) / 1000000000.0;
-            if (elapsedTime > maxTime)
-            {
-                endEarly = true;
-                break;
-            }
+           elapsedTime = ((double) System.nanoTime() - start) / 1000000000.0;
+           if (elapsedTime > maxTime)
+           {
+               endEarly = true;
+               break;
+           }
 
-            rowCol = board.getRowCol(i, i);
-            String row = rowCol[0];
-            String col = rowCol[1];
+           rowCol = board.getRowCol(i, i);
+           String row = rowCol[0];
+           String col = rowCol[1];
 
-            // check win or lose states
-            if (row.contains("XXXX") || col.contains("XXXX"))
-                return minimum;
+           // check win or lose states
+           if (row.contains("XXXX") || col.contains("XXXX"))
+               return minimum;
 
-            if (row.contains("OOOO") || col.contains("OOOO"))
-                return maximum;
+           if (row.contains("OOOO") || col.contains("OOOO"))
+               return maximum;
 
-            // check for player killer moves in row
-            if (row.contains("_XXX_"))
-                cost -= 200;
+           // check for player killer moves in row
+           if (row.contains("_XXX_"))
+               cost -= 300;
 
-            else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
-                cost -= 100;
+           else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
+               cost -= 150;
+           else if (row.contains("XXX"))
+              cost -= 100;
+           
+           // check for player killer moves in column
+           if (col.contains("_XXX_"))
+               cost -= 300;
 
-            // check for player killer moves in column
-            if (col.contains("_XXX_"))
-                cost -= 200;
+           else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
+               cost -= 150;
+           else if (col.contains("XXX"))
+              cost -= 100;
 
-            else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
-                cost -= 100;
+           // check for ai killer moves in row
+           if (row.contains("_OOO_"))
+               cost += 300;
 
-            // check for ai killer moves in row
-            if (row.contains("_OOO_"))
-                cost += 200;
+           else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
+               cost += 150;
+           else if (row.contains("OOO"))
+              cost += 100;
 
-            else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
-                cost += 100;
+           // check for ai killer moves in column
+           if (col.contains("_OOO_"))
+               cost += 300;
 
-            // check for ai killer moves in column
-            if (col.contains("_OOO_"))
-                cost += 200;
+           else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
+               cost += 150;
+           else if (col.contains("OOO"))
+              cost += 100;
 
-            else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
-                cost += 100;
+           if (row.contains("_XX_"))
+               cost -= 50;
+           else if (row.contains("_XX") || row.contains("XX_") || row.contains("X_X"))
+                 cost -= 25;
+           else if (row.contains("XX"))
+               cost -= 10;
 
-            if (row.contains("_XX_"))
-                cost -= 50;
-            else if (row.contains("XX"))
-                cost -= 10;
+           if (col.contains("_XX_"))
+               cost -= 50;
+           else if (col.contains("_XX") || col.contains("XX_") || col.contains("X_X"))
+              cost -= 25;
+           else if (col.contains("XX"))
+               cost -= 10;
 
-            if (col.contains("_XX_"))
-                cost -= 50;
-            else if (col.contains("XX"))
-                cost -= 10;
+           if (row.contains("_OO_"))
+               cost += 50;
+           else if (row.contains("_OO") || row.contains("OO_") || row.contains("O_O"))
+              cost += 25;
+           else if (row.contains("OO"))
+               cost += 10;
 
-            if (row.contains("_OO_"))
-                cost += 50;
-            else if (row.contains("OO"))
-                cost += 10;
+           if (col.contains("_OO_"))
+               cost += 50;
+           else if (col.contains("_OO") || col.contains("OO_") || col.contains("O_O"))
+              cost += 25;
+           else if (col.contains("OO"))
+               cost += 10;
 
-            if (col.contains("_OO_"))
-                cost += 50;
-            else if (col.contains("OO"))
-                cost += 10;
-
-            if (row.contains("X"))
-                cost -= 1;
-            if (col.contains("X"))
-                cost -= 1;
-
-            if (row.contains("O"))
-                cost += 1;
-            if (col.contains("O"))
-                cost += 1;
+           if (row.contains("_X_"))
+              cost -= 5;
+           else if (row.contains("X_") || row.contains("_X"))
+              cost -= 2;
+           else if (row.contains("X"))
+               cost -= 1;
+           
+           if (col.contains("_X_"))
+               cost -= 5;
+           else if (col.contains("X_") || col.contains("_X"))
+              cost -= 2;
+           else if (col.contains("X"))
+               cost -= 1;
+           
+           if (row.contains("_O_"))
+              cost += 5;
+           else if (row.contains("O_") || row.contains("_O"))
+              cost += 2;
+           else if (row.contains("O"))
+              cost += 1;
+           
+           if (col.contains("_O_"))
+              cost += 5;
+           else if (col.contains("O_") || col.contains("_O"))
+              cost += 2;
+           else if (col.contains("O"))
+              cost += 1;
 
         }
         // the above code assumes that the ai is O
@@ -429,61 +463,95 @@ public class Minimax implements Serializable
 
             // check for player killer moves in row
             if (row.contains("_XXX_"))
-                cost -= 200;
+                cost -= 300;
 
             else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
-                cost -= 100;
-
+                cost -= 150;
+            else if (row.contains("XXX"))
+               cost -= 100;
+            
             // check for player killer moves in column
             if (col.contains("_XXX_"))
-                cost -= 200;
+                cost -= 300;
 
             else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
-                cost -= 100;
+                cost -= 150;
+            else if (col.contains("XXX"))
+               cost -= 100;
 
             // check for ai killer moves in row
             if (row.contains("_OOO_"))
-                cost += 200;
+                cost += 300;
 
             else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
-                cost += 100;
+                cost += 150;
+            else if (row.contains("OOO"))
+               cost += 100;
 
             // check for ai killer moves in column
             if (col.contains("_OOO_"))
-                cost += 200;
+                cost += 300;
 
             else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
-                cost += 100;
+                cost += 150;
+            else if (col.contains("OOO"))
+               cost += 100;
 
             if (row.contains("_XX_"))
                 cost -= 50;
+            else if (row.contains("_XX") || row.contains("XX_") || row.contains("X_X"))
+                  cost -= 25;
             else if (row.contains("XX"))
                 cost -= 10;
 
             if (col.contains("_XX_"))
                 cost -= 50;
+            else if (col.contains("_XX") || col.contains("XX_") || col.contains("X_X"))
+               cost -= 25;
             else if (col.contains("XX"))
                 cost -= 10;
 
             if (row.contains("_OO_"))
                 cost += 50;
+            else if (row.contains("_OO") || row.contains("OO_") || row.contains("O_O"))
+               cost += 25;
             else if (row.contains("OO"))
                 cost += 10;
 
             if (col.contains("_OO_"))
                 cost += 50;
+            else if (col.contains("_OO") || col.contains("OO_") || col.contains("O_O"))
+               cost += 25;
             else if (col.contains("OO"))
                 cost += 10;
 
-            if (row.contains("X"))
+            if (row.contains("_X_"))
+               cost -= 5;
+            else if (row.contains("X_") || row.contains("_X"))
+               cost -= 2;
+            else if (row.contains("X"))
                 cost -= 1;
-            if (col.contains("X"))
+            
+            if (col.contains("_X_"))
+                cost -= 5;
+            else if (col.contains("X_") || col.contains("_X"))
+               cost -= 2;
+            else if (col.contains("X"))
                 cost -= 1;
-
-            if (row.contains("O"))
-                cost += 1;
-            if (col.contains("O"))
-                cost += 1;
+            
+            if (row.contains("_O_"))
+               cost += 5;
+            else if (row.contains("O_") || row.contains("_O"))
+               cost += 2;
+            else if (row.contains("O"))
+               cost += 1;
+            
+            if (col.contains("_O_"))
+               cost += 5;
+            else if (col.contains("O_") || col.contains("_O"))
+               cost += 2;
+            else if (col.contains("O"))
+               cost += 1;
 
         }
         // the above code assumes that the ai is O
