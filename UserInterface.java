@@ -12,6 +12,7 @@ public class UserInterface implements Serializable
     private Board board;
     private boolean playerFirst, savedFile, loadedFile;
     private double maxTime;
+    private int[] playerMoves;
     private transient Scanner keyboard;         // transient means do not store this object when saving this class as an object
     Minimax ai;
 
@@ -21,14 +22,10 @@ public class UserInterface implements Serializable
         keyboard = new Scanner(System.in);
         loadedFile = false;
         playerFirst = false;
+        playerMoves = new int[64];
         playerMovesLog = new ArrayList<String>(32); // 32 = board size / 2 = 8*8 / 2 = 64 / 2 = 32
         savedFile = false;
         maxTime = 5.0;
-    }
-
-    public void error()
-    {
-       System.out.print("ERROR DETECTED");
     }
 
     // Asks the user for the max time and order of play
@@ -134,13 +131,13 @@ public class UserInterface implements Serializable
 
        while (true)
        {
-          System.out.println("Enter maximum time to generate moves (1-30): ");
+          System.out.println("Enter maximum time to generate moves (5-30): ");
           try
           {
              maxTime = keyboard.nextDouble();
              keyboard.nextLine();    // catch last line if valid input is entered
-             if(maxTime < 1 || maxTime > 30)
-                throw new IllegalArgumentException("Input must be between 1 and 30.");
+             if(maxTime < 5 || maxTime > 30)
+                throw new IllegalArgumentException("Input must be between 5 and 30.");
 
              return maxTime;
           }
@@ -152,7 +149,7 @@ public class UserInterface implements Serializable
           catch(InputMismatchException e)
           {
              keyboard.nextLine();
-             error();
+             System.out.println("Invalid input. Try again");
           }
        }
     }
@@ -318,25 +315,27 @@ public class UserInterface implements Serializable
           aiMark = "X";
        }
 
-       int[] playerMove = new int[2];
+       int[] playerMove = {-1, -1};
 
        // initialize ai object if one was not loaded by the user
        if (!loadedFile)
        {
-            ai = new Minimax(board, maxTime, aiMark, playerMark);
+            ai = new Minimax(board, maxTime, aiMark, playerMark, playerMoves);
             loadedFile = false;     // reset boolean
        }
 
+       board.printBoard();
+       
        while (!board.isFull() || !wonGame)
        {
           if (playerFirst)
           {
              // user makes move
              playerMove = askUserMove();
+             playerMoves[playerMove[0]] = playerMove[1];
              board.markMove(playerMove[0], playerMove[1], playerMark);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, playerMark);
 
              if(wonGame)
@@ -346,12 +345,9 @@ public class UserInterface implements Serializable
              }
 
              // ai makes move
-             //ai.makeMove();
-             ai.makeMove();
-             //ai.testMove();   // DELETE AFTER TESTING
+             ai.makeMove(playerMove[0]);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, aiMark);
 
              if(wonGame)
@@ -360,10 +356,9 @@ public class UserInterface implements Serializable
           else
           {
              // ai makes move
-             ai.makeMove();
+             ai.makeMove(playerMove[0]);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, aiMark);
 
              if(wonGame)
@@ -371,10 +366,10 @@ public class UserInterface implements Serializable
 
              // user makes move
              playerMove = askUserMove();
+             playerMoves[playerMove[0]] = playerMove[1];
              board.markMove(playerMove[0], playerMove[1], playerMark);
              board.printBoard();
              board.printMovesLog(playerFirst, playerMovesLog, ai.getMovesLog());
-             board.pause(2);
              wonGame = checkWin(board, playerMark);
 
              if(wonGame)

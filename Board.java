@@ -93,55 +93,42 @@ public class Board implements Serializable
    // Checks for horizontal win on board
    public boolean horizontalWin(String marker)
    {
-      int counter = 0;
-      for(int i = 1; i < 9; i++)
-      {
-         for(int j = 1; j < 9; j++)
-         {
-            if(board[i][j].equalsIgnoreCase(marker))
+        for (int i = 1; i < 9; i++)
+        {
+            int counter = 0;
+            for (int j = 1; j < 9; j++)
             {
-               counter++; // Count if marker is there
-            }
-            else
-            {
-               counter = 0; // reset counter if marker not detected
-            }
+                if (board[i][j].equalsIgnoreCase(marker))
+                    counter++; // Count if marker is there
+                else
+                    counter = 0; // reset counter if marker not detected
 
-            if(counter >= 4) // If counter is greater than or equal to 4, winner
-            {
-               return true;
+                if (counter == 4) // If counter is equal to  4, winner
+                    return true;
             }
-         }
-      }
-      return false;
+        }
+        return false;
    }
 
    // Checks for vertical win on board
    public boolean verticalWin(String marker)
    {
-      int counter = 0;
-      for(int i = 1; i < 9; i++)
-      {
-         for(int j = 1; j < 9; j++)
-         {
-            if(board[j][i].equalsIgnoreCase(marker))
+        for (int i = 1; i < 9; i++)
+        {
+            int counter = 0;
+            for (int j = 1; j < 9; j++)
             {
-               counter++;
-            }
-            else
-            {
-               counter = 0;
-            }
+                if (board[j][i].equalsIgnoreCase(marker))
+                    counter++;
+                else
+                    counter = 0;
 
-            if(counter >= 4) // If counter is greater than or equal to 4, winner
-            {
-               return true;
+                if (counter == 4) // If counter is equal to 4, winner
+                    return true;
             }
-            //System.out.println(counter);
-         }
-      }
-      return false;
-   }
+        }
+        return false;
+    }
 
    // return true if all spaces on the board are full, false otherwise
    public boolean isFull()
@@ -155,22 +142,33 @@ public class Board implements Serializable
 
    // return the current board layout as a String
    public String[][] getBoard(){return board;}
-   
-   public void setBoard(int row, int col, String marker) // NEWCODE
-   {
-      board[row][col] = marker;
-   }
 
-   // pause the program for the given amount of time in seconds
-   public void pause(int waitTime)
+   // pause the program for the given amount of time in milliseconds
+   public void pause(long waitTime)
    {
        try
        {
-           Thread.sleep(waitTime * 1000);
+           Thread.sleep(waitTime);
        }
        catch (InterruptedException e)
        {
            e.printStackTrace();
        }
+   }
+
+   // return a String array representation of the game board (without headers) of the given row and column
+   // index 0 of the array stores the row, and index 1 stores the column
+   public String[] getRowCol(int rowIndex, int colIndex)
+   {
+       String row = "";
+       String col = "";
+
+       for (int i = 1; i < 9; i++)
+       {
+           row += board[rowIndex][i];
+           col += board[i][colIndex];
+       }
+
+       return new String[] {row, col};
    }
 }
