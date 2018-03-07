@@ -7,29 +7,9 @@ public class Minimax implements Serializable
 {
     private ArrayList<String> aiMovesLog;
     private Board board;
-    private double maxTime;
+    private boolean endEarly;
+    private double elapsedTime, maxTime;
     private String aiMark, playerMark;
-
-   // DELETE AFTER TESTING
-
-   // temp method for testing game with random ai moves
-   public void testMove()
-   {
-       Random r = new Random();
-       while(true)
-       {
-           int row = r.nextInt(8) + 1;  // range 1-8
-           int col = r.nextInt(8) + 1;  // range 1-8
-
-           // generate new row and col if the current space has been used
-           if (!board.getBoard()[row][col].equals("_"))
-                continue;
-
-           board.markMove(row, col, aiMark);
-           aiMovesLog.add(convertMoveToString(row, col));
-           break;
-       }
-   }
 
    public Minimax(Board board, double maxTime, String aiMarker, String playerMarker, int[] playerMoves)
    {
@@ -38,6 +18,9 @@ public class Minimax implements Serializable
 
       aiMark = aiMarker;
       aiMovesLog = new ArrayList<String>(32); // 32 = board size / 2 = 8*8 / 2 = 64 / 2 = 32
+
+      elapsedTime = 0.0;
+      endEarly = false;
 
       playerMark = playerMarker;
    }
@@ -56,40 +39,48 @@ public class Minimax implements Serializable
        int currentValue;
        int[] bestMove = new int[2];
        String[][] boardLayout = board.getBoard();
+       String[][] previousBoard;
 
        long start = System.nanoTime();
-       double elapsedTime = 0.0;
+       elapsedTime = 0.0;
+       endEarly = false;
 
-            // explore every empty space and calculate the cost of that move
-            for (int row = 1; row < 9; row++)
+        // explore every empty space and calculate the cost of that move
+        for (int row = 1; row < 9; row++)
+        {
+            for (int col = 1; col < 9 && elapsedTime < maxTime; col++)
             {
-                for (int col = 1; col < 9 && elapsedTime < maxTime; col++)
+                if (boardLayout[row][col].equals("_"))
                 {
-                    if (boardLayout[row][col].equals("_"))
+                    // store the current board  layout in case minimax breaks early
+                    previousBoard = boardLayout;
+
+                    // make a possible move
+                    boardLayout[row][col] = aiMark;
+
+                    // determine this moves cost
+                    currentValue = minimax(0, false, Integer.MIN_VALUE, Integer.MAX_VALUE, start);
+
+                    // restore the previous board layout
+                    boardLayout[row][col] = "_";
+
+                    if (endEarly)
                     {
-                        // make a possible move
-                        boardLayout[row][col] = aiMark;
-
-                        // determine this moves cost
-                        currentValue = minimax(0, true, Integer.MIN_VALUE, Integer.MAX_VALUE, start);
-
-                        // restore the previous board layout
-                        boardLayout[row][col] = "_";
-
-                        // save the best cost move
-                        if (currentValue > bestValue)
-                        {
-                            bestValue = currentValue;
-                            bestMove[0] = row;
-                            bestMove[1] = col;
-                        }
+                        boardLayout = previousBoard;
+                        break;
                     }
-                    elapsedTime = ( (double)System.nanoTime() - start) / 1000000000.0;
-                }
-            }
-            System.out.println("Best Cost: " + bestValue);
-            System.out.println(bestMove[0] + " " + bestMove[1]);
 
+                    // save the best cost move
+                    else if (currentValue > bestValue)
+                    {
+                        bestValue = currentValue;
+                        bestMove[0] = row;
+                        bestMove[1] = col;
+                    }
+                }
+                elapsedTime = ((double) System.nanoTime() - start) / 1000000000.0;
+            }
+        }
        return bestMove;
    }
 
@@ -97,14 +88,16 @@ public class Minimax implements Serializable
    // of the current board playout depending on the current player (max or min)
    // alpha = best (highest value) found for MAX so far
    // beta = best (lowest value) found for MIN so far
-   public int minimax(int depth, boolean isMax, int alpha, int beta, long start)
-   {
+    public int minimax(int depth, boolean isMax, int alpha, int beta, long start)
+    {
+        elapsedTime = ((double) System.nanoTime() - start) / 1000000000.0;
+        if (elapsedTime > maxTime)
+            endEarly = true;
 
-        //  RETURN THE COST OF THIS STATE
-        // cut off point for search, THIS SHOULD AN BE OPTIMIZED FOR COMPETITION
+        // cut off point for search
         // depth should be an even number
-        if (depth == 4)
-            return getCost();
+        if (depth == 2)
+            return getCost(start);
 
         int bestCost, currentCost;
 
@@ -112,84 +105,90 @@ public class Minimax implements Serializable
         // determine the best cost as the largest cost of the visited states
         if (isMax)
         {
-            bestCost = Integer.MIN_VALUE;      // default to lowest possible value
+            bestCost = Integer.MIN_VALUE; // default to lowest possible value
 
-                for (int row = 1; row < 9; row++)
-                {
-                    for (int col = 1; col < 9; col++)
-                    {
-                        if (board.getBoard()[row][col].equals("_"))
-                        {
-                            board.getBoard()[row][col] = aiMark;
-
-                            currentCost = minimax(depth+1, false, alpha, beta, start);
-                            bestCost = max(bestCost, currentCost);
-                            alpha = max(alpha, bestCost);
-
-                            // reset board to the previous (original) state
-                            board.getBoard()[row][col] = "_";
-
-                            // prune
-                            if (beta <= alpha)
-                                break;
-                        }
-                    }
-                }
-                return bestCost;
-            }
-
-        // minimizer
-        // determine the best cost as the smallest cost of the visited states
-        else
-        {
-            bestCost = Integer.MAX_VALUE;      // default to largest possible value
+            for (int row = 1; row < 9; row++)
             {
-                for (int row = 1; row < 9; row++)
+                for (int col = 1; col < 9; col++)
                 {
-                    for (int col = 1; col < 9; col++)
+                    if (board.getBoard()[row][col].equals("_"))
                     {
-                        if (board.getBoard()[row][col].equals("_"))
-                        {
-                            board.getBoard()[row][col] = playerMark;
+                        board.getBoard()[row][col] = aiMark;
 
-                            currentCost = minimax(depth+1, true, alpha, beta, start);
-                            bestCost = min(bestCost, currentCost);
-                            beta = min(beta, bestCost);
+                        currentCost = minimax(depth + 1, false, alpha, beta, start);
+                        bestCost = max(bestCost, currentCost);
+                        alpha = max(alpha, bestCost);
 
-                            // reset board to the previous (original) state
-                            board.getBoard()[row][col] = "_";
+                        // reset board to the previous (original) state
+                        board.getBoard()[row][col] = "_";
 
-                            // prune
-                            if (beta <= alpha)
-                                break;
-                        }
-
+                        // prune
+                        if (beta <= alpha)
+                            break;
                     }
                 }
             }
             return bestCost;
         }
+
+        // minimizer
+        // determine the best cost as the smallest cost of the visited states
+        else
+        {
+            bestCost = Integer.MAX_VALUE; // default to largest possible value
+
+            for (int row = 1; row < 9; row++)
+            {
+                for (int col = 1; col < 9; col++)
+                {
+                    if (board.getBoard()[row][col].equals("_"))
+                    {
+                        board.getBoard()[row][col] = playerMark;
+
+                        currentCost = minimax(depth + 1, true, alpha, beta, start);
+                        bestCost = min(bestCost, currentCost);
+                        beta = min(beta, bestCost);
+
+                        // reset board to the previous (original) state
+                        board.getBoard()[row][col] = "_";
+
+                        // prune
+                        if (beta <= alpha)
+                            break;
+                    }
+
+                }
+            }
+        }
+        return bestCost;
     }
 
     // heuristic
     // calculate the cost of the current state
-    public int getCost()
-     {
+    public int getCost(long start)
+    {
 
-         int maximum = 100000;
-         int minimum = -100000;
+        int maximum = 100000;
+        int minimum = -100000;
 
-         String[] rowCol = new String[2];
-         int cost = 0;
+        String[] rowCol = new String[2];
+        int cost = 0;
 
-         // evaluate the board assuming AI = O, Player = X
-         for (int i = 1; i < 9; i++)
-         {
-             rowCol = board.getRowCol(i, i);
-             String row = rowCol[0];
-             String col = rowCol[1];
+        // evaluate the board assuming AI = O, Player = X
+        for (int i = 1; i < 9; i++)
+        {
+            elapsedTime = ((double) System.nanoTime() - start) / 1000000000.0;
+            if (elapsedTime > maxTime)
+            {
+                endEarly = true;
+                break;
+            }
 
-             // check win or lose states
+            rowCol = board.getRowCol(i, i);
+            String row = rowCol[0];
+            String col = rowCol[1];
+
+            // check win or lose states
             if (row.contains("XXXX") || col.contains("XXXX"))
                 return minimum;
 
@@ -201,18 +200,18 @@ public class Minimax implements Serializable
                 cost -= 200;
 
             else if (row.contains("XXX_") || row.contains("_XXX") || row.contains("XX_X") || row.contains("X_XX"))
-                    cost -= 100;
+                cost -= 100;
 
             // check for player killer moves in column
             if (col.contains("_XXX_"))
                 cost -= 200;
 
             else if (col.contains("XXX_") || col.contains("_XXX") || col.contains("XX_X") || col.contains("X_XX"))
-                    cost -= 100;
+                cost -= 100;
 
             // check for ai killer moves in row
             if (row.contains("_OOO_"))
-               cost += 200;
+                cost += 200;
 
             else if (row.contains("OOO_") || row.contains("_OOO") || row.contains("OO_O") || row.contains("O_OO"))
                 cost += 100;
@@ -227,7 +226,7 @@ public class Minimax implements Serializable
             if (row.contains("_XX_"))
                 cost -= 50;
             else if (row.contains("XX"))
-                    cost -= 10;
+                cost -= 10;
 
             if (col.contains("_XX_"))
                 cost -= 50;
@@ -254,14 +253,14 @@ public class Minimax implements Serializable
             if (col.contains("O"))
                 cost += 1;
 
-          }
-          // the above code assumes that the ai is O
-          // change the sign of cost if ai is X
-          if (!aiMark.equals("O"))
-              return -cost;
-          else
+        }
+        // the above code assumes that the ai is O
+        // change the sign of cost if ai is X
+        if (!aiMark.equals("O"))
+            return -cost;
+        else
             return cost;
-     }
+    }
 
    public int max(int x, int y){return x > y ? x : y;}
    public int min(int x, int y){return x < y ? x : y;}
