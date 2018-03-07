@@ -38,7 +38,7 @@ public class Minimax implements Serializable
          moveIndex = getOtherMove();
       }
        aiMovesLog.add(convertMoveToString(moveIndex[0], moveIndex[1]));
-       board.markMove(moveIndex[0],  moveIndex[1], aiMark);
+       board.markMove(moveIndex[0], moveIndex[1], aiMark);
    }
 
    // return an integer array containing the position of the best move to make
@@ -156,7 +156,7 @@ public class Minimax implements Serializable
 
         // cut off point for search
         // depth should be an even number
-        if (depth == 2)
+        if (depth == 3)
             return getCost(start);
 
         int bestCost, currentCost;
@@ -231,7 +231,7 @@ public class Minimax implements Serializable
 
         // cut off point for search
         // depth should be an even number
-        if (depth == 2)
+        if (depth == 3)
             return getCostOther(start);
 
         int bestCost, currentCost;
@@ -303,8 +303,8 @@ public class Minimax implements Serializable
     public int getCost(long start)
     {
 
-        int maximum = 100000;
-        int minimum = -100000;
+       int maximum = Integer.MAX_VALUE;
+       int minimum = Integer.MIN_VALUE;
 
         String[] rowCol = new String[2];
         int cost = 0;
@@ -434,8 +434,8 @@ public class Minimax implements Serializable
     public int getCostOther(long start)
     {
 
-        int maximum = 100000;
-        int minimum = -100000;
+        int maximum = Integer.MAX_VALUE;
+        int minimum = Integer.MIN_VALUE;
 
         String[] rowCol = new String[2];
         int cost = 0;
