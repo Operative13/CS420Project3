@@ -156,7 +156,7 @@ public class Minimax implements Serializable
 
         // cut off point for search
         // depth should be an even number
-        if (depth == 4)
+        if (depth == 3)
             return getCost(start);
 
         int bestCost, currentCost;
@@ -231,7 +231,7 @@ public class Minimax implements Serializable
 
         // cut off point for search
         // depth should be an even number
-        if (depth == 4)
+        if (depth == 3)
             return getCostOther(start);
 
         int bestCost, currentCost;
@@ -491,7 +491,6 @@ public class Minimax implements Serializable
             // check for ai killer moves in column
             if (col.contains("_OOO_"))
                 cost += 300;
-
             else if (col.contains("OOO_") || col.contains("_OOO") || col.contains("OO_O") || col.contains("O_OO"))
                 cost += 150;
             else if (col.contains("OOO"))
